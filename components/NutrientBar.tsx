@@ -1,39 +1,26 @@
-import React from "react"
+import type React from "react"
 import { View, Text, StyleSheet } from "react-native"
-import Svg, { Circle } from "react-native-svg"
 
-interface CircularProgressProps {
-  percentage: number
+interface NutrientBarProps {
   label: string
-  value: string
-  color?: string
+  value: number
+  maxValue: number
+  color: string
+  icon: React.ReactNode
 }
 
-export const CircularProgress = ({ percentage, label, value, color = "#FFB74D" }: CircularProgressProps) => {
-  const radius = 35
-  const strokeWidth = 10
-  const circumference = 2 * Math.PI * radius
-  const progress = circumference - (percentage / 100) * circumference
+export const NutrientBar = ({ label, value, maxValue, color, icon }: NutrientBarProps) => {
+  const progress = (value / maxValue) * 100
 
   return (
     <View style={styles.container}>
-      <Svg width={100} height={100} style={styles.svg}>
-        <Circle cx={50} cy={50} r={radius} stroke="#E0E0E0" strokeWidth={strokeWidth} fill="none" />
-        <Circle
-          cx={50}
-          cy={50}
-          r={radius}
-          stroke={color}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeDasharray={circumference}
-          strokeDashoffset={progress}
-          strokeLinecap="round"
-        />
-      </Svg>
-      <View style={styles.textContainer}>
-        <Text style={styles.value}>{value}</Text>
+      <View style={styles.header}>
+        {icon}
         <Text style={styles.label}>{label}</Text>
+        <Text style={styles.value}>{value}g</Text>
+      </View>
+      <View style={styles.progressBackground}>
+        <View style={[styles.progressFill, { width: `${progress}%`, backgroundColor: color }]} />
       </View>
     </View>
   )
@@ -41,24 +28,31 @@ export const CircularProgress = ({ percentage, label, value, color = "#FFB74D" }
 
 const styles = StyleSheet.create({
   container: {
+    marginVertical: 8,
+  },
+  header: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-  },
-  svg: {
-    transform: [{ rotate: "-90deg" }],
-  },
-  textContainer: {
-    position: "absolute",
-    alignItems: "center",
-  },
-  value: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
+    marginBottom: 4,
   },
   label: {
+    flex: 1,
+    marginLeft: 8,
+    fontSize: 14,
+    color: "#333",
+  },
+  value: {
     fontSize: 14,
     color: "#666",
+  },
+  progressBackground: {
+    height: 8,
+    backgroundColor: "#E0E0E0",
+    borderRadius: 4,
+  },
+  progressFill: {
+    height: "100%",
+    borderRadius: 4,
   },
 })
 
