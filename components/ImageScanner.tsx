@@ -1,77 +1,147 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, Alert } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+import React, { useState } from "react"
+import { View, Text, TouchableOpacity, Image, Alert } from "react-native"
+import * as ImagePicker from "expo-image-picker"
+import * as FileSystem from "expo-file-system"
+import { Ionicons } from "@expo/vector-icons"
+import { ScanningAnimation } from "./ScanningAnimation"
+import { FoodAnalysisDrawer } from "./FoodAnalysisDrawer"
 
 const ImageScanner = () => {
-  const [image, setImage] = useState<string | null>(null);
+  const [image, setImage] = useState<string | null>(null)
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [showDrawer, setShowDrawer] = useState(false)
+  const [foodData, setFoodData] = useState<{
+    name: string
+    description: string
+    nutritionalInfo?: string
+  } | null>(null)
 
-  // Request permission and handle image selection
-  const pickImage = async (source: 'camera' | 'gallery') => {
-    // Request necessary permissions
+  const pickImage = async (source: "camera" | "gallery") => {
     const permissionResult =
-      source === 'camera'
+      source === "camera"
         ? await ImagePicker.requestCameraPermissionsAsync()
-        : await ImagePicker.requestMediaLibraryPermissionsAsync();
+        : await ImagePicker.requestMediaLibraryPermissionsAsync()
 
     if (!permissionResult.granted) {
-      Alert.alert('Permission Denied', `You need to grant ${source} access to use this feature.`);
-      return;
+      Alert.alert("Permission Denied", `You need to grant ${source} access to use this feature.`)
+      return
     }
 
-    // Open camera or gallery
     const result =
-      source === 'camera'
+      source === "camera"
         ? await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images, // Specify media type for camera
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
             quality: 1,
           })
         : await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images, // Specify media type for gallery
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
             quality: 1,
-          });
+          })
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri); // Save the selected image's URI
+      setImage(result.assets[0].uri)
+      analyzeFoodImage(result.assets[0].uri)
     }
-  };
+  }
+
+  const analyzeFoodImage = async (imageUri: string) => {
+    setIsAnalyzing(true)
+    setShowDrawer(true)
+    setFoodData(null)
+
+    try {
+      // Validate if the image exists
+      const fileInfo = await FileSystem.getInfoAsync(imageUri)
+      if (!fileInfo.exists) {
+        throw new Error("File does not exist at the specified URI")
+      }
+
+      // Prepare the image for the FormData
+      const fileBlob = {
+        uri: imageUri,
+        type: "image/jpeg", // Update type as needed
+        name: "food_image.jpg",
+      }
+
+      const formData = new FormData()
+      formData.append("image", fileBlob as any) // Cast for TypeScript compatibility
+
+      // POST the image to the backend
+      const response = await fetch("http://192.168.151.2:5000/scan_img", {
+        method: "POST",
+        body: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to upload the image")
+      }
+
+      const data = await response.json()
+
+      setFoodData({
+        name: data.name || "Unknown Food",
+        description: data.description || "No description available",
+        nutritionalInfo: data.nutritionalInfo || "Nutritional information not available",
+      })
+    } catch (error) {
+      console.error(error)
+      Alert.alert("Error", "Failed to analyze the image. Please try again.")
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }
+
+  const handleConsume = () => {
+    Alert.alert("Confirmed", "You have confirmed to consume this food!")
+    setShowDrawer(false)
+    setImage(null)
+    setFoodData(null)
+  }
 
   return (
-    <View className="flex-1 bg-gray-100 items-center justify-center p-4">
-      <Text className="text-xl font-bold text-gray-800 mb-4">Image Scanner</Text>
-
-      {/* Buttons for selecting image */}
-      <View className="flex-row space-x-4 mb-6">
-        <TouchableOpacity
-          className="bg-green-500 py-3 px-6 rounded-lg"
-          onPress={() => pickImage('gallery')}
-        >
-          <Text className="text-white font-medium text-base">Select from Gallery</Text>
+    <View className="flex-1 bg-gray-50">
+      {/* Header */}
+      <View className="flex-row items-center p-4 bg-white">
+        <TouchableOpacity>
+          <Ionicons name="arrow-back" size={24} color="#4B5563" />
         </TouchableOpacity>
-        <TouchableOpacity
-          className="bg-blue-500 py-3 px-6 rounded-lg"
-          onPress={() => pickImage('camera')}
-        >
-          <Text className="text-white font-medium text-base">Take a Photo</Text>
+        <Text className="text-xl font-semibold text-gray-800 ml-4">Analysis</Text>
+        <TouchableOpacity className="ml-auto">
+          <Ionicons name="ellipsis-horizontal" size={24} color="#4B5563" />
         </TouchableOpacity>
       </View>
 
-      {/* Display selected image */}
-      {image && (
-        <View className="items-center">
-          <Image
-            source={{ uri: image }}
-            className="w-48 h-48 rounded-lg mb-4"
-          />
-          <TouchableOpacity
-            className="bg-indigo-500 py-3 px-6 rounded-lg"
-            onPress={() => Alert.alert('Image Ready', 'You can now upload this image!')}
-          >
-            <Text className="text-white font-medium text-base">Upload Image</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
-  );
-};
+      {/* Main Content */}
+      <View className="flex-1 items-center justify-center p-4">
+        {image ? (
+          <View className="w-full aspect-square relative rounded-2xl overflow-hidden">
+            <Image source={{ uri: image }} className="w-full h-full" resizeMode="cover" />
+            {isAnalyzing && <ScanningAnimation />}
+          </View>
+        ) : (
+          <View className="flex-row space-x-4">
+            <TouchableOpacity className="bg-green-500 py-3 px-6 rounded-lg" onPress={() => pickImage("gallery")}>
+              <Text className="text-white font-medium">Select from Gallery</Text>
+            </TouchableOpacity>
+            <TouchableOpacity className="bg-blue-500 py-3 px-6 rounded-lg" onPress={() => pickImage("camera")}>
+              <Text className="text-white font-medium">Take a Photo</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
 
-export default ImageScanner;
+      {/* Analysis Drawer */}
+      <FoodAnalysisDrawer
+        isVisible={showDrawer}
+        isAnalyzing={isAnalyzing}
+        foodData={foodData}
+        onConsume={handleConsume}
+      />
+    </View>
+  )
+}
+
+export default ImageScanner

@@ -1,31 +1,17 @@
-import { View, Text } from 'react-native'
-import React, { useEffect } from 'react'
-import { useSelector } from 'react-redux'
-import ImageScanner from '@/components/ImageScanner'
-import { registerUser } from "@/api"
+import React from "react"
+import { View } from "react-native"
+import { useSelector } from "react-redux"
+import ImageScanner from "@/components/ImageScanner"
 
+const Home = () => {
+  const age = useSelector((state: any) => state.user.userData.age)
 
-const home = () => {
-  // console.log(state)
-  const age = useSelector((state : any ) => state.user.userData.age)
-  console.log(age)
-
-  useEffect(()=>{
-
-    const fetchData = async() => {
-      const response = await registerUser();
-      console.log(response);
-    }
-    
-    fetchData()
-  } , [])
   return (
-    <View>
-      <Text>home</Text>
-      <Text>{age}</Text>
+    <View className="flex-1 bg-gray-50">
       <ImageScanner />
     </View>
   )
 }
 
-export default home
+export default Home
+
