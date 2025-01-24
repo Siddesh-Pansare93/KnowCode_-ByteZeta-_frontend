@@ -10,11 +10,7 @@ const Home = () => {
   const { isSignedIn  } = useAuth()
   const {user} = useUser()
   //TODO : remove relevant data from user and dispatch to store 
-<<<<<<< HEAD
   // console.log(user)
-=======
-  console.log(user)
->>>>>>> 289325c (Initial setup for app)
 
   if (isSignedIn) {
     // return <Redirect href={'/(boarding)/(tabs)/UserDataform'} />
