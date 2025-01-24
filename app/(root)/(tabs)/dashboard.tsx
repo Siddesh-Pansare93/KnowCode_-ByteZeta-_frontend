@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
+import { useSelector } from "react-redux";
 import { CircularProgress } from "@/components/CircularProgress";
 import { NutrientBar } from "@/components/NutrientBar";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 
 const generateWeekDays = () => {
   const today = new Date();
@@ -20,9 +21,16 @@ const generateWeekDays = () => {
   return days;
 };
 
- const dashboard = () => {
+const Dashboard = () => {
   const [days, setDays] = useState(generateWeekDays());
   const [selectedDate, setSelectedDate] = useState(new Date());
+
+  const user = useSelector((state: any) => state.user.userData);
+  const dietData = useSelector((state: any) => state.user.diet);
+  // const dailyInsights = useSelector((state: any) => state.insights.dailyInsights);
+
+  const { name, profilePicture } = user || {};
+  const { nutrients, calorieIntake } = dietData || {};
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -30,14 +38,10 @@ const generateWeekDays = () => {
       if (now.getHours() === 0 && now.getMinutes() === 0) {
         setDays(generateWeekDays());
       }
-    }, 60000); // Check every minute
+    }, 60000);
 
     return () => clearInterval(timer);
   }, []);
-
-  const handleAddMeal = (mealType: string) => {
-    console.log(`Adding ${mealType}`);
-  };
 
   const handleNavigation = (screen: string) => {
     console.log(`Navigating to ${screen}`);
@@ -45,17 +49,18 @@ const generateWeekDays = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+      {/* Header */}
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, paddingVertical: 16 }}>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Image
             source={{
-              uri: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/iPhone%2013%20mini%20-%2014-131akDJnO3GtW3YoI8Iu0ekwSSTvDN.png",
+              uri: profilePicture || "https://via.placeholder.com/40",
             }}
             style={{ width: 40, height: 40, borderRadius: 20, marginRight: 12 }}
           />
           <View>
             <Text style={{ fontSize: 14, color: "#666" }}>Welcome</Text>
-            <Text style={{ fontSize: 16, fontWeight: "600", color: "#333" }}>Siddesh Pansare</Text>
+            <Text style={{ fontSize: 16, fontWeight: "600", color: "#333" }}>{name || "User"}</Text>
           </View>
         </View>
         <View style={{ flexDirection: "row", gap: 16 }}>
@@ -68,49 +73,37 @@ const generateWeekDays = () => {
         </View>
       </View>
 
+      {/* Main Content */}
       <ScrollView style={{ paddingHorizontal: 20 }}>
+        {/* Header */}
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
           <Text style={{ fontSize: 24, fontWeight: "bold", color: "#333" }}>Track your diet journey</Text>
           <Image
             source={{
-              uri: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/iPhone%2013%20mini%20-%2014-131akDJnO3GtW3YoI8Iu0ekwSSTvDN.png",
+              uri: profilePicture || "https://via.placeholder.com/60",
             }}
             style={{ width: 60, height: 60 }}
           />
         </View>
 
-        <Text style={{ fontSize: 16, color: "#FF9B9B", marginBottom: 16 }}>Today Calorie: 1783</Text>
+        <Text style={{ fontSize: 16, color: "#FF9B9B", marginBottom: 16 }}>
+          Today Calorie: {calorieIntake || 0}
+        </Text>
 
+        {/* Nutrient Progress */}
         <View style={{ flexDirection: "row", gap: 16, marginBottom: 24 }}>
           <View style={{ flex: 1, backgroundColor: "#FFF9C4", borderRadius: 16, padding: 16, justifyContent: "center", alignItems: "center" }}>
-            <CircularProgress percentage={10} label="Fat" value="928 kcal" />
+            <CircularProgress percentage={nutrients?.Fat || 0} label="Fat" value={`${nutrients?.Fat || 0} kcal`} />
           </View>
 
           <View style={{ flex: 1, backgroundColor: "#FFCDD2", borderRadius: 16, padding: 16 }}>
-            <NutrientBar
-              label="Protein"
-              value={22}
-              maxValue={50}
-              color="#FF9B9B"
-              icon={<FontAwesome name="coffee" size={20} color="#333" />}
-            />
-            <NutrientBar
-              label="Carbs"
-              value={18}
-              maxValue={50}
-              color="#FFB74D"
-              icon={<FontAwesome name="coffee" size={20} color="#333" />}
-            />
-            <NutrientBar
-              label="Fat"
-              value={19}
-              maxValue={50}
-              color="#90CAF9"
-              icon={<FontAwesome name="coffee" size={20} color="#333" />}
-            />
+            <NutrientBar label="Protein" value={nutrients?.Proteins || 0} maxValue={100} color="#FF9B9B" icon={undefined} />
+            <NutrientBar label="Carbs" value={nutrients?.Carbohydrates || 0} maxValue={100} color="#FFB74D" icon={undefined} />
+            <NutrientBar label="Fat" value={nutrients?.Fats || 0} maxValue={100} color="#90CAF9" icon={undefined} />
           </View>
         </View>
 
+        {/* Date Picker */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 24 }}>
           {days.map((day) => (
             <TouchableOpacity
@@ -144,41 +137,26 @@ const generateWeekDays = () => {
           ))}
         </ScrollView>
 
+        {/* Daily Insights Section */}
         <View style={{ gap: 16, marginBottom: 24 }}>
-          {[
-            { type: "Breakfast", icon: FontAwesome, iconName: "coffee", calories: "450-650" },
-            { type: "Lunch", icon: MaterialCommunityIcons, iconName: "food", calories: "450-650" },
-            { type: "Dinner", icon: MaterialCommunityIcons, iconName: "food", calories: "450-650" },
-          ].map((meal) => (
-            <TouchableOpacity key={meal.type} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: "#F5F5F5", borderRadius: 12, padding: 16 }} onPress={() => handleAddMeal(meal.type)}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-                <meal.icon name={meal.iconName as any} size={24} color="#333" />
-                <View>
-                  <Text style={{ fontSize: 16, fontWeight: "600", color: "#333" }}>Add {meal.type}</Text>
-                  <Text style={{ fontSize: 14, color: "#666" }}>Recommended {meal.calories} cal</Text>
-                </View>
-              </View>
-              <Text style={{ fontSize: 24, color: "#4CAF50" }}>+</Text>
-            </TouchableOpacity>
-          ))}
+          <Text style={{ fontSize: 20, fontWeight: "600", color: "#333", marginBottom: 8 }}>Daily Insights</Text>
+          {/* {(dailyInsights || []).map((insight: string, index: number) => (
+            <View
+              key={index}
+              style={{
+                backgroundColor: "#F5F5F5",
+                borderRadius: 12,
+                padding: 16,
+                marginBottom: 8,
+              }}
+            >
+              <Text style={{ fontSize: 16, fontWeight: "500", color: "#333" }}>{insight}</Text>
+            </View>
+          ))} */}
         </View>
       </ScrollView>
-
-      {/* <View style={{ flexDirection: "row", justifyContent: "space-around", alignItems: "center", paddingVertical: 16, borderTopWidth: 1, borderTopColor: "#E0E0E0" }}>
-        {[
-          { icon: Ionicons, label: "Home", name: "home-outline" },
-          { icon: Ionicons, label: "Recipes", name: "restaurant-outline" },
-          { icon: Ionicons, label: "Stats", name: "stats-chart-outline" },
-          { icon: Ionicons, label: "Profile", name: "person-outline" },
-        ].map((item) => (
-          <TouchableOpacity key={item.label} style={{ padding: 8 }} onPress={() => handleNavigation(item.label.toLowerCase())}>
-            <item.icon name={item.name as keyof typeof Ionicons.glyphMap} size={24} color="#333" />
-          </TouchableOpacity>
-        ))}
-      </View> */}
     </SafeAreaView>
   );
 };
 
-
-export default dashboard
+export default Dashboard;
