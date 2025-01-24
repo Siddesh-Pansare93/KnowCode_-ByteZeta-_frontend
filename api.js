@@ -10,12 +10,12 @@ const api = axios.create({
 });
 
 // Example: User registration
-export const registerUser = async () => {
+export const registerUser = async (userData) => {
   try {
-    const response = await api.post("/users/register");
-    return response;
+    const response = await api.post("/users/register", userData);
+    return response.data;
   } catch (error) {
-    throw error.response|| "An error occurred";
+    throw error.response?.data || "An error occurred";
   }
 };
 

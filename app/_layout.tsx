@@ -5,13 +5,13 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { Provider } from 'react-redux'; // Import Redux Provider
-import { PersistGate } from 'redux-persist/integration/react'; // Import PersistGate
-import store, { persistor } from '../store/store'; // Import the store and persistor
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import store, { persistor } from '../store/store';
+import Constants from 'expo-constants'; // To fetch environment variables
 import 'react-native-reanimated';
 import '../global.css';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -35,25 +35,27 @@ export default function RootLayout() {
     return null;
   }
 
-  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
   if (!publishableKey) {
+    console.error("Publishable Key is missing or invalid.");
     throw new Error(
       'Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your .env'
     );
   }
 
+  console.log("Publishable Key:", publishableKey);
+
   return (
     <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}> 
+      <PersistGate loading={null} persistor={persistor}>
         <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
           <ClerkLoaded>
-            {/* Custom Status Bar */}
             <StatusBar
-              style="dark" // Set to "dark" for dark text (for light backgrounds)
-              backgroundColor="#ffffff" // Set to your preferred background color
-              translucent={false} // Makes the status bar opaque
-              hidden={false} // Ensures the status bar is visible
+              style="dark"
+              backgroundColor="#ffffff"
+              translucent={false}
+              hidden={false}
             />
             <Stack>
               <Stack.Screen name="index" options={{ headerShown: false }} />

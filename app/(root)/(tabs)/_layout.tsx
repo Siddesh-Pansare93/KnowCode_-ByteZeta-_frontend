@@ -58,9 +58,9 @@ export default function RootLayout() {
         
         />
         <Tabs.Screen 
-        name="chat" 
+        name="dashboard" 
         options={{ 
-          title: 'Chat',
+          title: 'Dashboard',
           headerShown: false,
           tabBarIcon : ({focused}) => (<TabIcon source={icons.chat } focused={focused}/>)
          }} 
