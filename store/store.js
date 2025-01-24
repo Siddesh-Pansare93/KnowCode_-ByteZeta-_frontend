@@ -3,6 +3,7 @@ import { persistStore, persistReducer } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // For React Native
 import userDataReducer from './features/userDataSlice'; // Your user reducer
 import userAuthReducer from './features/userAuthSlice'; // Your user reducer
+import userDietReduceer from './features/userDietSlice'
 
 // Configure persistence
 const persistConfig = {
@@ -12,7 +13,8 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
     userData: userDataReducer,
-    auth : userAuthReducer
+    auth : userAuthReducer , 
+    diet : userDietReduceer
 
 })
 

@@ -51,6 +51,10 @@ export default function RootLayout() {
 
       <Tabs.Screen 
         name='dashboard'
+        options={{
+          title: 'Dashboard',
+          headerShown: false,
+        }}
         
       /> 
       {/* <Tabs.Screen 
