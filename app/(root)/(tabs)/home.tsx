@@ -10,15 +10,15 @@ const home = () => {
   const age = useSelector((state : any ) => state.user.userData.age)
   console.log(age)
 
-  // useEffect(()=>{
+  useEffect(()=>{
 
-  //   const fetchData = async() => {
-  //     const response = await registerUser();
-  //     console.log(response);
-  //   }
+    const fetchData = async() => {
+      const response = await registerUser();
+      console.log(response);
+    }
     
-  //   fetchData()
-  // } , [])
+    fetchData()
+  } , [])
   return (
     <View>
       <Text>home</Text>
