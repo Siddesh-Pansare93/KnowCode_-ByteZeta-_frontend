@@ -49,24 +49,26 @@ export default function RootLayout() {
 
       />
 
-      <Tabs.Screen 
+      <Tabs.Screen
         name='dashboard'
         options={{
           title: 'Dashboard',
           headerShown: false,
         }}
-        
-      /> 
-      {/* <Tabs.Screen 
-        name="rides" 
-        options={{ 
-          title: 'Rides',
-          headerShown: false,
-          tabBarIcon : ({focused}) => (<TabIcon source={icons.list } focused={focused}/>)
-         }}  */}
 
-      {/* /> */}
+      />
       
+
+
+      <Tabs.Screen
+        name="scanner" 
+        options={{
+          title: 'Scanner',
+          headerShown: false,
+          // tabBarIcon: ({ focused }) => (<TabIcon source={icons.scanner} focused={focused}/>)
+            } }
+       />
+
       <Tabs.Screen
         name="profile"
         options={{
@@ -76,8 +78,6 @@ export default function RootLayout() {
         }}
 
       />
-
-
     </Tabs>
 
 

@@ -1,30 +1,53 @@
-import React, { useState } from "react"
-import { View, Text, TouchableOpacity, Image, Alert } from "react-native"
-import * as ImagePicker from "expo-image-picker"
-import * as FileSystem from "expo-file-system"
-import { Ionicons } from "@expo/vector-icons"
-import { ScanningAnimation } from "./ScanningAnimation"
-import { FoodAnalysisDrawer } from "./FoodAnalysisDrawer"
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Alert,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { Ionicons } from "@expo/vector-icons";
+import { ScanningAnimation } from "./ScanningAnimation"; // Ensure this component is implemented
+import { useSelector, useDispatch } from "react-redux";
+import { setNutrients, resetNutrients } from "../store/features/dailyIntakeSlice"; // Update import
+import { AppDispatch, RootState } from "../store/store"; // Make sure to import these from store
 
 const ImageScanner = () => {
-  const [image, setImage] = useState<string | null>(null)
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [showDrawer, setShowDrawer] = useState(false)
-  const [foodData, setFoodData] = useState<{
-    name: string
-    description: string
-    nutritionalInfo?: string
-  } | null>(null)
+  const [image, setImage] = useState<string | null>(null);
+  const [description, setDescription] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  interface FoodData {
+    feedback?: string;
+    ingredients?: string[];
+    nutritional_facts?: string;
+    user_diet?: string;
+  }
+  
+  const [foodData, setFoodData] = useState<FoodData>({});
 
-  const pickImage = async (source: "camera" | "gallery") => {
+  const dispatch = useDispatch();
+  // const foodData = useSelector((state: RootState) => state.user.dailyIntake) as {
+  //   feedback?: string;
+  //   ingredients?: string[];
+  //   nutritional_facts?: string;
+  //   user_diet?: string;
+  // }; // Update to `dailyIntake`
+  const userDetails = useSelector((state: RootState) => state.user.userData);
+  const userDiet = useSelector((state: RootState) => state.user.diet);
+
+  const pickImage = async (source: string) => {
     const permissionResult =
       source === "camera"
         ? await ImagePicker.requestCameraPermissionsAsync()
-        : await ImagePicker.requestMediaLibraryPermissionsAsync()
+        : await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissionResult.granted) {
-      Alert.alert("Permission Denied", `You need to grant ${source} access to use this feature.`)
-      return
+      Alert.alert("Permission Denied", `You need to grant ${source} access to use this feature.`);
+      return;
     }
 
     const result =
@@ -36,70 +59,72 @@ const ImageScanner = () => {
         : await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             quality: 1,
-          })
+          });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri)
-      analyzeFoodImage(result.assets[0].uri)
+      setImage(result.assets[0].uri);
     }
-  }
+  };
 
-  const analyzeFoodImage = async (imageUri: string) => {
-    setIsAnalyzing(true)
-    setShowDrawer(true)
-    setFoodData(null)
+  const analyzeFoodImage = async () => {
+    if (!image || !description) {
+      Alert.alert("Error", "Please provide both an image and a description.");
+      return;
+    }
+
+    setIsAnalyzing(true);
+    dispatch(resetNutrients());  // Reset any previous nutrient data
 
     try {
-      // Validate if the image exists
-      const fileInfo = await FileSystem.getInfoAsync(imageUri)
-      if (!fileInfo.exists) {
-        throw new Error("File does not exist at the specified URI")
-      }
-
-      // Prepare the image for the FormData
+      // Convert the URI to a Blob
+      const uriParts = image.split(".");
+      const fileType = uriParts[uriParts.length - 1];
       const fileBlob = {
-        uri: imageUri,
-        type: "image/jpeg", // Update type as needed
-        name: "food_image.jpg",
-      }
+        uri: image,
+        type: `image/${fileType}`,
+        name: `food_image.${fileType}`,
+      };
 
-      const formData = new FormData()
-      formData.append("image", fileBlob as any) // Cast for TypeScript compatibility
+      const formData = new FormData();
+      formData.append("image", fileBlob as any);
+      formData.append("description", description);
+      formData.append("user_Details", JSON.stringify(userDetails));
+      formData.append("user_Diet", JSON.stringify(userDiet));
 
-      // POST the image to the backend
       const response = await fetch("http://192.168.151.2:5000/scan_img", {
         method: "POST",
         body: formData,
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      })
+      });
 
-      if (!response.ok) {
-        throw new Error("Failed to upload the image")
+      const data = await response.json();  // Parse the JSON response
+      console.log(data);
+
+      if(data){
+        setFoodData(data)
       }
 
-      const data = await response.json()
-
-      setFoodData({
-        name: data.name || "Unknown Food",
-        description: data.description || "No description available",
-        nutritionalInfo: data.nutritionalInfo || "Nutritional information not available",
-      })
+      // Ensure nutritional facts are available before dispatching
+      // if (data.nutritional_facts) {
+      //   dispatch(setNutrients({
+      //     nutritional_facts: JSON.parse(data.nutritional_facts),  // Parse and dispatch only nutrients
+      //   }));
+      // }
     } catch (error) {
-      console.error(error)
-      Alert.alert("Error", "Failed to analyze the image. Please try again.")
+      console.error(error);
+      Alert.alert("Error", "Failed to analyze the image. Please try again.");
     } finally {
-      setIsAnalyzing(false)
+      setIsAnalyzing(false);
     }
-  }
+  };
 
-  const handleConsume = () => {
-    Alert.alert("Confirmed", "You have confirmed to consume this food!")
-    setShowDrawer(false)
-    setImage(null)
-    setFoodData(null)
-  }
+  const resetAll = () => {
+    setImage(null);
+    setDescription("");
+    dispatch(resetNutrients());
+  };
 
   return (
     <View className="flex-1 bg-gray-50">
@@ -108,40 +133,101 @@ const ImageScanner = () => {
         <TouchableOpacity>
           <Ionicons name="arrow-back" size={24} color="#4B5563" />
         </TouchableOpacity>
-        <Text className="text-xl font-semibold text-gray-800 ml-4">Analysis</Text>
+        <Text className="text-xl font-semibold text-gray-800 ml-4">Image Scanner</Text>
         <TouchableOpacity className="ml-auto">
           <Ionicons name="ellipsis-horizontal" size={24} color="#4B5563" />
         </TouchableOpacity>
       </View>
 
       {/* Main Content */}
-      <View className="flex-1 items-center justify-center p-4">
+      <View className="flex-1 p-4">
         {image ? (
-          <View className="w-full aspect-square relative rounded-2xl overflow-hidden">
-            <Image source={{ uri: image }} className="w-full h-full" resizeMode="cover" />
-            {isAnalyzing && <ScanningAnimation />}
-          </View>
+          <ScrollView className="flex-1">
+            <View className="rounded-xl overflow-hidden shadow-md bg-white mb-4">
+              <Image source={{ uri: image }} className="w-full h-64" resizeMode="cover" />
+              {isAnalyzing && <ScanningAnimation />}
+            </View>
+            <TextInput
+              placeholder="Enter description"
+              value={description}
+              onChangeText={setDescription}
+              className="border border-gray-300 p-3 rounded-lg mt-4"
+            />
+            <View className="flex-row justify-between mt-4">
+              <TouchableOpacity
+                className={`flex-1 py-3 px-6 rounded-lg ${
+                  isAnalyzing ? "bg-gray-400" : "bg-green-500"
+                }`}
+                onPress={analyzeFoodImage}
+                disabled={isAnalyzing}
+              >
+                {isAnalyzing ? (
+                  <ActivityIndicator size="small" color="#FFF" />
+                ) : (
+                  <Text className="text-white font-medium text-center">Analyze</Text>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1 py-3 px-6 bg-red-500 rounded-lg ml-4"
+                onPress={resetAll}
+              >
+                <Text className="text-white font-medium text-center">Reset</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         ) : (
-          <View className="flex-row space-x-4">
-            <TouchableOpacity className="bg-green-500 py-3 px-6 rounded-lg" onPress={() => pickImage("gallery")}>
-              <Text className="text-white font-medium">Select from Gallery</Text>
+          <View className="flex-row justify-evenly mt-12">
+            <TouchableOpacity
+              className="bg-green-500 py-3 px-6 rounded-lg"
+              onPress={() => pickImage("gallery")}
+            >
+              <Text className="text-white font-medium">Gallery</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="bg-blue-500 py-3 px-6 rounded-lg" onPress={() => pickImage("camera")}>
-              <Text className="text-white font-medium">Take a Photo</Text>
+            <TouchableOpacity
+              className="bg-blue-500 py-3 px-6 rounded-lg"
+              onPress={() => pickImage("camera")}
+            >
+              <Text className="text-white font-medium">Camera</Text>
             </TouchableOpacity>
           </View>
         )}
+
+        {/* Display Meal Data */}
+        {foodData && foodData.feedback && (
+          <View className="mt-4 p-4 bg-white rounded-lg shadow-md">
+            <Text className="text-lg font-bold text-gray-800">Feedback:</Text>
+            <Text className="text-gray-600 mt-2">{foodData.feedback}</Text>
+          </View>
+        )}
+
+        {foodData && foodData.ingredients && (
+          <View className="mt-4 p-4 bg-white rounded-lg shadow-md">
+            <Text className="text-lg font-bold text-gray-800">Ingredients:</Text>
+            <Text className="text-gray-600 mt-2">{foodData.ingredients.join(", ")}</Text>
+          </View>
+        )}
+
+        {foodData && foodData.nutritional_facts && (
+          <View className="mt-4 p-4 bg-white rounded-lg shadow-md">
+            <Text className="text-lg font-bold text-gray-800">Nutritional Facts:</Text>
+            {/* Render each nutritional fact key-value pair */}
+            {Object.entries(JSON.parse(foodData.nutritional_facts)).map(([key, value]) => (
+              <Text key={key} className="text-gray-600 mt-2">
+                {key}: {String(value)}
+              </Text>
+            ))}
+          </View>
+        )}
+
+        {foodData && foodData.user_diet && (
+          <View className="mt-4 p-4 bg-white rounded-lg shadow-md">
+            <Text className="text-lg font-bold text-gray-800">User Diet Suggestion:</Text>
+            <Text className="text-gray-600 mt-2">{foodData.user_diet}</Text>
+          </View>
+        )}
       </View>
-
-      {/* Analysis Drawer */}
-      <FoodAnalysisDrawer
-        isVisible={showDrawer}
-        isAnalyzing={isAnalyzing}
-        foodData={foodData}
-        onConsume={handleConsume}
-      />
     </View>
-  )
-}
+  );
+};
 
-export default ImageScanner
+export default ImageScanner;
