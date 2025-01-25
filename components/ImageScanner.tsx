@@ -26,7 +26,7 @@ const ImageScanner = () => {
     nutritional_facts?: string;
     user_diet?: string;
   }
-  
+
   const [foodData, setFoodData] = useState<FoodData>({});
 
   const dispatch = useDispatch();
@@ -53,13 +53,13 @@ const ImageScanner = () => {
     const result =
       source === "camera"
         ? await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            quality: 1,
-          })
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          quality: 1,
+        })
         : await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            quality: 1,
-          });
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          quality: 1,
+        });
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
@@ -102,7 +102,7 @@ const ImageScanner = () => {
       const data = await response.json();  // Parse the JSON response
       console.log(data);
 
-      if(data){
+      if (data) {
         setFoodData(data)
       }
 
@@ -155,9 +155,8 @@ const ImageScanner = () => {
             />
             <View className="flex-row justify-between mt-4">
               <TouchableOpacity
-                className={`flex-1 py-3 px-6 rounded-lg ${
-                  isAnalyzing ? "bg-gray-400" : "bg-green-500"
-                }`}
+                className={`flex-1 py-3 px-6 rounded-lg ${isAnalyzing ? "bg-gray-400" : "bg-green-500"
+                  }`}
                 onPress={analyzeFoodImage}
                 disabled={isAnalyzing}
               >
@@ -193,38 +192,42 @@ const ImageScanner = () => {
         )}
 
         {/* Display Meal Data */}
-        {foodData && foodData.feedback && (
-          <View className="mt-4 p-4 bg-white rounded-lg shadow-md">
-            <Text className="text-lg font-bold text-gray-800">Feedback:</Text>
-            <Text className="text-gray-600 mt-2">{foodData.feedback}</Text>
-          </View>
-        )}
 
-        {foodData && foodData.ingredients && (
-          <View className="mt-4 p-4 bg-white rounded-lg shadow-md">
-            <Text className="text-lg font-bold text-gray-800">Ingredients:</Text>
-            <Text className="text-gray-600 mt-2">{foodData.ingredients.join(", ")}</Text>
-          </View>
-        )}
+        <ScrollView>
+          {foodData && foodData.ingredients && (
+            <View className="mt-4 p-4 bg-white rounded-lg shadow-md">
+              <Text className="text-lg font-bold text-gray-800">Ingredients:</Text>
+              <Text className="text-gray-600 mt-2">{foodData.ingredients.join(", ")}</Text>
+            </View>
+          )}
 
-        {foodData && foodData.nutritional_facts && (
-          <View className="mt-4 p-4 bg-white rounded-lg shadow-md">
-            <Text className="text-lg font-bold text-gray-800">Nutritional Facts:</Text>
-            {/* Render each nutritional fact key-value pair */}
-            {Object.entries(JSON.parse(foodData.nutritional_facts)).map(([key, value]) => (
-              <Text key={key} className="text-gray-600 mt-2">
-                {key}: {String(value)}
-              </Text>
-            ))}
-          </View>
-        )}
+          {foodData && foodData.nutritional_facts && (
+            <View className="mt-4 p-4 bg-white rounded-lg shadow-md">
+              <Text className="text-lg font-bold text-gray-800">Nutritional Facts:</Text>
+              {/* Render each nutritional fact key-value pair */}
+              {Object.entries(JSON.parse(foodData.nutritional_facts)).map(([key, value]) => (
+                <Text key={key} className="text-gray-600 mt-2">
+                  {key}: {String(value)}
+                </Text>
+              ))}
+            </View>
+          )}
 
-        {foodData && foodData.user_diet && (
-          <View className="mt-4 p-4 bg-white rounded-lg shadow-md">
-            <Text className="text-lg font-bold text-gray-800">User Diet Suggestion:</Text>
-            <Text className="text-gray-600 mt-2">{foodData.user_diet}</Text>
-          </View>
-        )}
+
+
+          {foodData && foodData.feedback && (
+            <View className="mt-4 p-4 bg-white rounded-lg shadow-md">
+              <Text className="text-lg font-bold text-gray-800">Feedback:</Text>
+              <Text className="text-gray-600 mt-2">{foodData.feedback}</Text>
+            </View>
+          )}
+          {foodData && foodData.user_diet && (
+            <View className="mt-4 p-4 bg-white rounded-lg shadow-md">
+              <Text className="text-lg font-bold text-gray-800">Final Thoughts:</Text>
+              <Text className="text-gray-600 mt-2">{foodData.user_diet}</Text>
+            </View>
+          )}
+        </ScrollView>
       </View>
     </View>
   );

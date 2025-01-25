@@ -54,6 +54,8 @@ export default function RootLayout() {
         options={{
           title: 'Dashboard',
           headerShown: false,
+          tabBarIcon: ({ focused }) => (<TabIcon source={icons.list} focused={focused} />)
+
         }}
 
       />
@@ -65,7 +67,7 @@ export default function RootLayout() {
         options={{
           title: 'Scanner',
           headerShown: false,
-          // tabBarIcon: ({ focused }) => (<TabIcon source={icons.scanner} focused={focused}/>)
+          tabBarIcon: ({ focused }) => (<TabIcon source={icons.chat} focused={focused}/>)
             } }
        />
 
