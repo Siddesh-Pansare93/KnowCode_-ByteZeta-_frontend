@@ -30,7 +30,7 @@ const Home = () => {
         <View className="flex-row justify-between items-center mb-4">
           <View>
             <Text className="text-3xl font-bold text-white">Welcome!</Text>
-            <Text className="text-lg text-gray-200">Your Age: {age}</Text>
+            {/* <Text className="text-lg text-gray-200">Your Age: {age}</Text> */}
           </View>
           <TouchableOpacity>
             <FontAwesome5 name="user-circle" size={40} color="white" />

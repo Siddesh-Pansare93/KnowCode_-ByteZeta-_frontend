@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Image, Pressable } from "react-native";
 import { useSelector } from "react-redux";
 import { CircularProgress } from "@/components/CircularProgress";
 import { NutrientBar } from "@/components/NutrientBar";
@@ -31,6 +31,10 @@ const Dashboard = () => {
 
   const { name, profilePicture } = user || {};
   const { nutrients, calorieIntake } = dietData || {};
+
+  const dailyInsights: string[] = [
+    "Add BreakFast", "Add Dinner", "Add Lunch"
+  ]
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -111,7 +115,7 @@ const Dashboard = () => {
               style={[
                 { paddingHorizontal: 16, paddingVertical: 8, marginRight: 8, borderRadius: 20, backgroundColor: "#F5F5F5", alignItems: "center" },
                 selectedDate.getDate() === day.date &&
-                  selectedDate.getMonth() === day.fullDate.getMonth() && { backgroundColor: "#FF9B9B" },
+                selectedDate.getMonth() === day.fullDate.getMonth() && { backgroundColor: "#FF9B9B" },
               ]}
               onPress={() => setSelectedDate(day.fullDate)}
             >
@@ -119,7 +123,7 @@ const Dashboard = () => {
                 style={[
                   { fontSize: 14, color: "#666" },
                   selectedDate.getDate() === day.date &&
-                    selectedDate.getMonth() === day.fullDate.getMonth() && { color: "#fff" },
+                  selectedDate.getMonth() === day.fullDate.getMonth() && { color: "#fff" },
                 ]}
               >
                 {day.day}
@@ -128,7 +132,7 @@ const Dashboard = () => {
                 style={[
                   { fontSize: 16, fontWeight: "600", color: "#333" },
                   selectedDate.getDate() === day.date &&
-                    selectedDate.getMonth() === day.fullDate.getMonth() && { color: "#fff" },
+                  selectedDate.getMonth() === day.fullDate.getMonth() && { color: "#fff" },
                 ]}
               >
                 {day.date}
@@ -140,19 +144,22 @@ const Dashboard = () => {
         {/* Daily Insights Section */}
         <View style={{ gap: 16, marginBottom: 24 }}>
           <Text style={{ fontSize: 20, fontWeight: "600", color: "#333", marginBottom: 8 }}>Daily Insights</Text>
-          {/* {(dailyInsights || []).map((insight: string, index: number) => (
-            <View
-              key={index}
-              style={{
-                backgroundColor: "#F5F5F5",
-                borderRadius: 12,
-                padding: 16,
-                marginBottom: 8,
-              }}
-            >
-              <Text style={{ fontSize: 16, fontWeight: "500", color: "#333" }}>{insight}</Text>
-            </View>
-          ))} */}
+          <Pressable>|
+            {(dailyInsights || []).map((insight: string, index: number) => (
+              <View
+                key={index}
+                style={{
+                  backgroundColor: "#F5F5F5",
+                  borderRadius: 12,
+                  padding: 16,
+                  marginBottom: 8,
+                }}
+              >
+
+                <Text style={{ fontSize: 16, fontWeight: "500", color: "#333" }}>{insight}</Text>
+              </View>
+            ))}
+          </Pressable>
         </View>
       </ScrollView>
     </SafeAreaView>
