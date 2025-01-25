@@ -90,16 +90,16 @@ export const onboarding = [
     },
     {
         id: 2,
-        title: "Quote 2 ",
+        title: "WELCOME",
         description:
-            "some description",
+            "Every Meal is a chance to make Healthier Choice",
         image: images.foodapponboarding2,
     },
     {
         id: 3,
-        title: "Your ride, your way. Let's go!",
+        title: "WELCOME",
         description:
-            "Enter your destination, sit back, and let us take care of the rest.",
+            "Every bite counts, Make them nutritious",
         image: images.foodapponboarding3,
     },
 ];
