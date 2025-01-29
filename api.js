@@ -2,8 +2,8 @@ import axios from "axios";
 
 // Base URL of your backend
 const BASE_URL = "http://192.168.151.250:8000";
-const PYTHONURL = "http://192.168.151.2:5000"
-//  // Replace with your backend's URL
+const PYTHONURL = "https://know-code-byte-zeta-backend-41c0dpcnv-suuummiiits-projects.vercel.app" ; 
+
 
 // Axios instance
 const api = axios.create({

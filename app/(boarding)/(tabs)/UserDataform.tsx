@@ -59,7 +59,7 @@ const UserDetailsForm = () => {
     setTimeout(() => {
       // Now that the state is updated, navigate to home
       router.push('/(root)/(tabs)/home');
-    }, 5000)
+    }, 3000)
   };
 
   return (
@@ -235,12 +235,12 @@ const UserDetailsForm = () => {
         </Text>
         <TextInput
           className="border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-gray-800 dark:text-gray-200"
-          placeholder="Enter your target weight"
+          placeholder="Enter your Goals"
           placeholderTextColor="#A1A1A1"
           value={formData.goals}
           onChangeText={(text) => handleInputChange('goals', text)}
         />
-      </View>
+      </View> 
 
       {/* Submit Button */}
       <TouchableOpacity

@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   nutrients: {},
   lastUpdated: null, // To track last update timestamp
+  dailyIntakeHistory: [], // New array to store history of nutrients
 };
 
 const dailyIntakeSlice = createSlice({
@@ -12,8 +13,16 @@ const dailyIntakeSlice = createSlice({
     setNutrients(state, action) {
       const currentTime = Date.now();
 
-      // If it's been more than 24 hours, reset the nutrients
+      // If it's been more than 24 hours, save current day's nutrients to history
       if (state.lastUpdated && currentTime - state.lastUpdated > 86400000) {
+        // Store today's data in the history
+        const currentDayData = {
+          date: new Date(state.lastUpdated).toLocaleDateString(),
+          nutrients: { ...state.nutrients },
+        };
+        state.dailyIntakeHistory.push(currentDayData);
+
+        // Reset the nutrients for the new day
         state.nutrients = {};
       }
 
@@ -28,7 +37,7 @@ const dailyIntakeSlice = createSlice({
         }
       });
 
-      // Update the timestamp
+      // Update the timestamp for the current day
       state.lastUpdated = currentTime;
     },
     resetNutrients(state) {

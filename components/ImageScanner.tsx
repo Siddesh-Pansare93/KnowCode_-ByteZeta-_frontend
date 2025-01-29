@@ -8,6 +8,7 @@ import {
   Alert,
   ScrollView,
   ActivityIndicator,
+  Pressable,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
@@ -67,13 +68,13 @@ const ImageScanner = () => {
   };
 
   const analyzeFoodImage = async () => {
-    if (!image || !description) {
-      Alert.alert("Error", "Please provide both an image and a description.");
+    if (!image ) {
+      Alert.alert("Error", "Please provide both an image ");
       return;
     }
 
     setIsAnalyzing(true);
-    dispatch(resetNutrients());  // Reset any previous nutrient data
+    // dispatch(resetNutrients());  // Reset any previous nutrient data
 
     try {
       // Convert the URI to a Blob
@@ -87,31 +88,48 @@ const ImageScanner = () => {
 
       const formData = new FormData();
       formData.append("image", fileBlob as any);
-      formData.append("description", description);
+      formData.append("description", description || "");
       formData.append("user_Details", JSON.stringify(userDetails));
       formData.append("user_Diet", JSON.stringify(userDiet));
 
-      const response = await fetch("http://192.168.151.2:5000/scan_img", {
-        method: "POST",
-        body: formData,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      // const response = await fetch("http://192.168.151.2:5000/scan_img", {
+      //   method: "POST",
+      //   body: formData,
+      //   headers: {
+      //     "Content-Type": "multipart/form-data",
+      //   },
+      // });
 
-      const data = await response.json();  // Parse the JSON response
-      console.log(data);
+      // const data = await response.json();  // Parse the JSON response
+      // console.log(data);
 
-      if (data) {
-        setFoodData(data)
-      }
-
-      // Ensure nutritional facts are available before dispatching
-      // if (data.nutritional_facts) {
-      //   dispatch(setNutrients({
-      //     nutritional_facts: JSON.parse(data.nutritional_facts),  // Parse and dispatch only nutrients
-      //   }));
+      // if (data) {
+      //   setFoodData(data)
       // }
+
+      const dummyFoodData = {
+        ingredients: ["Chicken breast", "Olive oil", "Garlic", "Lemon", "Rosemary", "Salt", "Pepper"],
+        nutritional_facts: JSON.stringify({
+          "Calcium": 50,
+          "Calories": 200,
+          "Carbohydrates": 250,
+          "Fats": 70,
+          "Fiber": 40,
+          "Iron": 18,
+          "Magnesium": 0.4,
+          "Potassium": 0.47,
+          "Proteins": 120,
+          "Sugars": 50,
+          "Vitamin A": 0.0009,
+          "Vitamin C": 0.075,
+          "Vitamin D": 0.015
+        }),
+        feedback: "This is a healthy meal, rich in protein and low in carbs. Great choice for muscle building!",
+        user_diet: "Based on your diet plan, this meal fits perfectly within your recommended daily intake for protein and fat.",
+      };
+      console.log(foodData)
+      setFoodData(dummyFoodData);
+
     } catch (error) {
       console.error(error);
       Alert.alert("Error", "Failed to analyze the image. Please try again.");
@@ -120,15 +138,24 @@ const ImageScanner = () => {
     }
   };
 
+
+  const dispatch_NutrientsToStore = () => {
+    //  Ensuring nutritional facts are available before dispatching
+      if (foodData.nutritional_facts) {
+        dispatch(setNutrients( JSON.parse(foodData.nutritional_facts),  // Parse and dispatch only nutrients
+        ));
+      }
+  }
+
   const resetAll = () => {
     setImage(null);
     setDescription("");
-    dispatch(resetNutrients());
+    setFoodData({});
   };
 
   return (
     <View className="flex-1 bg-gray-50">
-      {/* Header */}
+      {/* Header */} 
       <View className="flex-row items-center p-4 bg-white">
         <TouchableOpacity>
           <Ionicons name="arrow-back" size={24} color="#4B5563" />
@@ -148,7 +175,7 @@ const ImageScanner = () => {
               {isAnalyzing && <ScanningAnimation />}
             </View>
             <TextInput
-              placeholder="Enter description"
+              placeholder="Enter description (OPTIONAL)"
               value={description}
               onChangeText={setDescription}
               className="border border-gray-300 p-3 rounded-lg mt-4"
@@ -228,6 +255,28 @@ const ImageScanner = () => {
             </View>
           )}
         </ScrollView>
+        {foodData.nutritional_facts && (
+  <View className="w-full h-[120px] flex justify-center items-center bg-white shadow-md rounded-lg mt-6">
+    <Text className="text-2xl font-extrabold text-gray-900 mb-4">
+      Had You Eaten This?
+    </Text>
+    <View className="flex flex-row justify-evenly w-full gap-x-6 ">
+      <Pressable
+        onPress={dispatch_NutrientsToStore}
+        className="px-6 py-3 rounded-full bg-green-600 bg-gradient-to-r from-green-400 to-green-600 shadow-lg transform hover:scale-105 active:scale-95"
+      >
+        <Text className="text-xl font-bold text-white">Yes</Text>
+      </Pressable>
+      <Pressable
+        onPress={resetAll}
+        className="px-6 py-3 rounded-full bg-gradient-to-r from-red-400 bg-red-600 shadow-lg transform hover:scale-105 active:scale-95"
+      >
+        <Text className="text-xl font-bold text-white">No</Text>
+      </Pressable>
+    </View>
+  </View>
+)}
+
       </View>
     </View>
   );

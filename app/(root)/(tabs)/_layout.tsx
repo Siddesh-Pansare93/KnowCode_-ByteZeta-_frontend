@@ -80,6 +80,13 @@ export default function RootLayout() {
         }}
 
       />
+      <Tabs.Screen
+        name='store'
+        options={{
+          title: 'Store',
+          headerShown: false,
+        }}
+      />
     </Tabs>
 
 
