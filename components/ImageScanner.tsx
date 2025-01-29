@@ -17,11 +17,14 @@ import { useSelector, useDispatch } from "react-redux";
 import { setNutrients, resetNutrients, addIngredient } from "../store/features/dailyIntakeSlice"; // Update import
 import { AppDispatch, RootState } from "../store/store"; // Make sure to import these from store
 
+
+const recentScans: [{}] = [{}]
+
 const ImageScanner = () => {
   const [image, setImage] = useState<string | null>(null);
   const [description, setDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  
+
   interface FoodData {
     feedback?: string;
     ingredients?: string[];
@@ -33,7 +36,7 @@ const ImageScanner = () => {
 
   const dispatch = useDispatch();
   const ingredientsFromState = useSelector((state: RootState) => state.user.dailyIntake.ingredients);  // Moved here
-  const userData =  useSelector((state : RootState) => state.user.userData)
+  const userData = useSelector((state: RootState) => state.user.userData)
 
   const pickImage = async (source: string) => {
     const permissionResult =
@@ -124,6 +127,15 @@ const ImageScanner = () => {
         });
       }
     }
+
+    setTimeout(() => {
+      recentScans.push(foodData)
+      setFoodData({})
+      console.log(recentScans)
+    }, 5000)
+
+
+    
   };
 
   const resetAll = () => {
@@ -134,7 +146,7 @@ const ImageScanner = () => {
 
   return (
     <View className="flex-1 bg-gray-50">
-      {/* Header */} 
+      {/* Header */}
       <View className="flex-row items-center p-4 bg-white">
         <TouchableOpacity>
           <Ionicons name="arrow-back" size={24} color="#4B5563" />

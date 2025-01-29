@@ -7,7 +7,7 @@ import { View, Text, Image, ImageSourcePropType } from 'react-native';
 const TabIcon = ({ focused, source }: { focused: boolean, source: ImageSourcePropType }) => {
   return (
     <View className={`flex  justify-center items-center rounded-full   ${focused ? 'bg-green-500' : ''} `}>
-      <View className={`flex  w-12 h-12 justify-center items-center rounded-full  ${focused ? 'bg-green-500' : ''} `}>
+      <View className={`flex  w-12 h-10 justify-center items-center rounded-full  ${focused ? 'bg-green-500' : ''} `}>
         <Image source={source} className='w-7 h-7  ' tintColor="White" resizeMode='contain' />
       </View>
     </View>
@@ -23,10 +23,10 @@ export default function RootLayout() {
       screenOptions={{
         tabBarActiveTintColor: 'white',
         tabBarInactiveTintColor: 'white',
-        tabBarShowLabel: false,
+        tabBarShowLabel: true,
         tabBarStyle: {
           backgroundColor: '#333333',
-          paddingTop: 5,
+          paddingTop: 1,
           marginBottom: 20,
           marginHorizontal: 20,
           borderRadius: 45,
@@ -67,7 +67,7 @@ export default function RootLayout() {
         options={{
           title: 'Scanner',
           headerShown: false,
-          tabBarIcon: ({ focused }) => (<TabIcon source={icons.chat} focused={focused}/>)
+          tabBarIcon: ({ focused }) => (<TabIcon source={icons.scan} focused={focused}/>)
             } }
        />
 
@@ -78,15 +78,8 @@ export default function RootLayout() {
           headerShown: false,
           tabBarIcon: ({ focused }) => (<TabIcon source={icons.profile} focused={focused} />)
         }}
-
       />
-      <Tabs.Screen
-        name='store'
-        options={{
-          title: 'Store',
-          headerShown: false,
-        }}
-      />
+      
     </Tabs>
 
 

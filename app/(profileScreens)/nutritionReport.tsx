@@ -5,7 +5,7 @@ import { useSelector } from "react-redux"
 import type { RootState } from "@/store/store"
 
 const screenWidth = Dimensions.get("window").width
-const chartWidth = screenWidth - 60 // Reduced width to account for padding
+const chartWidth = screenWidth - 70 // Reduced width to account for padding
 
 const NutritionReportScreen = () => {
   const nutrients = useSelector((state: RootState) => state.user.dailyIntake.nutrients)
@@ -111,8 +111,8 @@ const NutritionReportScreen = () => {
           data={progressData}
           width={chartWidth}
           height={220}
-          strokeWidth={12}
-          radius={28}
+          strokeWidth={6}
+          radius={10}
           chartConfig={{
             ...chartConfig,
             color: (opacity = 1) => `rgba(65, 105, 225, ${opacity})`,

@@ -13,9 +13,14 @@ const DailyIntake = () => {
   })
 
   // Mock data for demonstration
-  const totalDailyGoal = 2000 // calories
-  const currentIntake = 1500 // calories
-  const progressPercentage = (currentIntake / totalDailyGoal) * 100
+    const currentIntake = useSelector((state : RootState) => state.user.dailyIntake.nutrients) as Record<string, number>;
+    // const currentIntake = 1500 // calories
+    // const totalDailyGoal = useSelector((state : RootState) => state.user.diet.nutrients) as Record<string, number>;
+    const totalDailyGoal = {
+      Calories: 2500,
+    } ;
+  console.log("Calories" , totalDailyGoal)
+  const progressPercentage = (currentIntake.Calories / totalDailyGoal?.Calories) * 100
 
   return (
     <View style={styles.container}>
@@ -27,7 +32,7 @@ const DailyIntake = () => {
         </View>
         <View style={styles.calorieInfo}>
           <Text style={styles.calorieText}>
-            {currentIntake} / {totalDailyGoal}
+            {currentIntake.Calories} / {totalDailyGoal.Calories}
           </Text>
           <Text style={styles.calorieSubtext}>calories consumed</Text>
         </View>
@@ -44,9 +49,9 @@ const DailyIntake = () => {
           </TouchableOpacity>
         ))}
       </ScrollView>
-      <TouchableOpacity style={styles.addButton}>
+      {/* <TouchableOpacity style={styles.addButton}>
         <Text style={styles.addButtonText}>+ Add Food</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   )
 }

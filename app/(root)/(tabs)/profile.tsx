@@ -16,8 +16,8 @@ export default function ProfileScreen() {
 
   };
 
-  const handleMyMeals = () => {
-    router.push("/");
+  const handelePreferenceUpdate = () => {
+    router.push("/(boarding)/(tabs)/UserDataform");
   };
 
   const handleNutritionReport = () => {
@@ -83,11 +83,11 @@ export default function ProfileScreen() {
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={handleMyMeals} className="flex-row items-center py-4 border-b border-gray-100">
+          <TouchableOpacity onPress={handelePreferenceUpdate} className="flex-row items-center py-4 border-b border-gray-100">
             <View className="w-10 h-10 rounded-full bg-gray-50 items-center justify-center">
               <Ionicons name="restaurant-outline" size={24} color="#6B7280" />
             </View>
-            <Text className="flex-1 ml-4 text-base text-gray-800">My Meals</Text>
+            <Text className="flex-1 ml-4 text-base text-gray-800">Update Preferences</Text>
             <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </TouchableOpacity>
 

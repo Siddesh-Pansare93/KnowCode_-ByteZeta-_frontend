@@ -35,6 +35,7 @@ import foodapponboarding3 from "@/assets/images/foodapponboarding3.png"
 import welcomebg from '@/assets/images/welcomebg.png'
 import authImage from '@/assets/images/authImage.png'
 import authImage1 from '@/assets/images/authImage1.png'
+import scan from '@/assets/icons/scan.png'
 
 
 
@@ -78,6 +79,7 @@ export const icons = {
     star,
     target,
     to,
+    scan
 };
 
 export const onboarding = [
