@@ -65,45 +65,18 @@ const SignIn = () => {
   // Handle submission of verification form
   const onVerifyPress = async () => {
     if (!isLoaded) return;
-
+  
     try {
       const signUpAttempt = await signUp.attemptEmailAddressVerification({
         code: verification.code,
       });
-
+  
       if (signUpAttempt.status === 'complete') {
         await setActive({ session: signUpAttempt.createdSessionId });
+        setVerification({ ...verification, status: 'success' });
 
-        try {
-          const response = await registerUser({
-            name: form.name,
-            email: signUp.emailAddress,
-            clerkId: signUp.createdUserId,
-          });
-          console.log(response)
-
-          if (response.success) {
-            await setActive({ session: response.sessionId });
-            router.push('/(boarding)/(tabs)/UserDataform'); // Navigate to UserDataform
-            setVerification({ ...verification, status: 'success' }); // Navigate to UserDataform
-            return {
-              success: true,
-              message: 'Registration successful, please complete your profile.',
-            };
-          } else {
-            router.push('/(auth)/signup'); // Registration failure fallback
-            return {
-              success: false,
-              message: 'Registration failed. Please try again.',
-            };
-          }
-        } catch (error) {
-          console.error('Error during registration:', error);
-          return {
-            success: false,
-            message: 'An error occurred while registering the user.',
-          };
-        }
+        router.replace('/(boarding)/(tabs)/UserDataform'); // Navigate immediately to UserDataform
+  
       } else {
         setVerification({ ...verification, status: 'failed', error: 'Verification Failed' });
       }
@@ -112,6 +85,7 @@ const SignIn = () => {
       console.error(err);
     }
   };
+  
 
   return (
     <ScrollView className="flex-1 bg-white">
@@ -168,23 +142,7 @@ const SignIn = () => {
         </View>
       </View>
 
-      {/* Success Modal */}
-      <Modal isVisible={verification.status === 'success'}>
-        <View className="min-h-[250px] bg-white rounded-2xl px-7 py-9 flex items-center">
-          <Image source={images.check} className="w-30 h-30 mx-auto mb-5" />
-          <Text className="text-3xl font-JakartaBold text-center">Verified</Text>
-          <Text className="text-base text-center text-gray-400 mb-6">
-            Your account has been successfully verified
-          </Text>
-          <CustomButton
-            title="Continue"
-            bgVariant="success"
-            onPress={() => {
-              router.push('/(boarding)/(tabs)/UserDataform'); // Navigate to UserDataform
-            }}
-          />
-        </View>
-      </Modal>
+      
 
       {/* Verification Modal */}
       <Modal

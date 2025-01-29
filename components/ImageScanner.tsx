@@ -14,13 +14,14 @@ import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { ScanningAnimation } from "./ScanningAnimation"; // Ensure this component is implemented
 import { useSelector, useDispatch } from "react-redux";
-import { setNutrients, resetNutrients } from "../store/features/dailyIntakeSlice"; // Update import
+import { setNutrients, resetNutrients, addIngredient } from "../store/features/dailyIntakeSlice"; // Update import
 import { AppDispatch, RootState } from "../store/store"; // Make sure to import these from store
 
 const ImageScanner = () => {
   const [image, setImage] = useState<string | null>(null);
   const [description, setDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  
   interface FoodData {
     feedback?: string;
     ingredients?: string[];
@@ -31,14 +32,8 @@ const ImageScanner = () => {
   const [foodData, setFoodData] = useState<FoodData>({});
 
   const dispatch = useDispatch();
-  // const foodData = useSelector((state: RootState) => state.user.dailyIntake) as {
-  //   feedback?: string;
-  //   ingredients?: string[];
-  //   nutritional_facts?: string;
-  //   user_diet?: string;
-  // }; // Update to `dailyIntake`
-  const userDetails = useSelector((state: RootState) => state.user.userData);
-  const userDiet = useSelector((state: RootState) => state.user.diet);
+  const ingredientsFromState = useSelector((state: RootState) => state.user.dailyIntake.ingredients);  // Moved here
+  const userData =  useSelector((state : RootState) => state.user.userData)
 
   const pickImage = async (source: string) => {
     const permissionResult =
@@ -68,13 +63,12 @@ const ImageScanner = () => {
   };
 
   const analyzeFoodImage = async () => {
-    if (!image ) {
+    if (!image) {
       Alert.alert("Error", "Please provide both an image ");
       return;
     }
 
     setIsAnalyzing(true);
-    // dispatch(resetNutrients());  // Reset any previous nutrient data
 
     try {
       // Convert the URI to a Blob
@@ -89,46 +83,22 @@ const ImageScanner = () => {
       const formData = new FormData();
       formData.append("image", fileBlob as any);
       formData.append("description", description || "");
-      formData.append("user_Details", JSON.stringify(userDetails));
-      formData.append("user_Diet", JSON.stringify(userDiet));
+      formData.append("user_Details", JSON.stringify(userData))
 
-      // const response = await fetch("http://192.168.151.2:5000/scan_img", {
-      //   method: "POST",
-      //   body: formData,
-      //   headers: {
-      //     "Content-Type": "multipart/form-data",
-      //   },
-      // });
+      const response = await fetch("http://192.168.151.2:5000/scan_img", {
+        method: "POST",
+        body: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-      // const data = await response.json();  // Parse the JSON response
-      // console.log(data);
+      const data = await response.json();  // Parse the JSON response
+      console.log(data);
 
-      // if (data) {
-      //   setFoodData(data)
-      // }
-
-      const dummyFoodData = {
-        ingredients: ["Chicken breast", "Olive oil", "Garlic", "Lemon", "Rosemary", "Salt", "Pepper"],
-        nutritional_facts: JSON.stringify({
-          "Calcium": 50,
-          "Calories": 200,
-          "Carbohydrates": 250,
-          "Fats": 70,
-          "Fiber": 40,
-          "Iron": 18,
-          "Magnesium": 0.4,
-          "Potassium": 0.47,
-          "Proteins": 120,
-          "Sugars": 50,
-          "Vitamin A": 0.0009,
-          "Vitamin C": 0.075,
-          "Vitamin D": 0.015
-        }),
-        feedback: "This is a healthy meal, rich in protein and low in carbs. Great choice for muscle building!",
-        user_diet: "Based on your diet plan, this meal fits perfectly within your recommended daily intake for protein and fat.",
-      };
-      console.log(foodData)
-      setFoodData(dummyFoodData);
+      if (data) {
+        setFoodData(data);
+      }
 
     } catch (error) {
       console.error(error);
@@ -138,14 +108,23 @@ const ImageScanner = () => {
     }
   };
 
+  // Move logic inside the component
+  const dispatch_NutrientsAndIngredientsToStore = () => {
+    if (foodData.nutritional_facts) {
+      const parsedNutritionalFacts = JSON.parse(foodData.nutritional_facts);
 
-  const dispatch_NutrientsToStore = () => {
-    //  Ensuring nutritional facts are available before dispatching
-      if (foodData.nutritional_facts) {
-        dispatch(setNutrients( JSON.parse(foodData.nutritional_facts),  // Parse and dispatch only nutrients
-        ));
+      // Dispatch the nutrients
+      dispatch(setNutrients(parsedNutritionalFacts));
+
+      if (foodData.ingredients && Array.isArray(foodData.ingredients)) {
+        foodData.ingredients.forEach((ingredient: string) => {
+          if (!ingredientsFromState.includes(ingredient)) {
+            dispatch(addIngredient(ingredient));
+          }
+        });
       }
-  }
+    }
+  };
 
   const resetAll = () => {
     setImage(null);
@@ -240,8 +219,6 @@ const ImageScanner = () => {
             </View>
           )}
 
-
-
           {foodData && foodData.feedback && (
             <View className="mt-4 p-4 bg-white rounded-lg shadow-md">
               <Text className="text-lg font-bold text-gray-800">Feedback:</Text>
@@ -255,28 +232,28 @@ const ImageScanner = () => {
             </View>
           )}
         </ScrollView>
-        {foodData.nutritional_facts && (
-  <View className="w-full h-[120px] flex justify-center items-center bg-white shadow-md rounded-lg mt-6">
-    <Text className="text-2xl font-extrabold text-gray-900 mb-4">
-      Had You Eaten This?
-    </Text>
-    <View className="flex flex-row justify-evenly w-full gap-x-6 ">
-      <Pressable
-        onPress={dispatch_NutrientsToStore}
-        className="px-6 py-3 rounded-full bg-green-600 bg-gradient-to-r from-green-400 to-green-600 shadow-lg transform hover:scale-105 active:scale-95"
-      >
-        <Text className="text-xl font-bold text-white">Yes</Text>
-      </Pressable>
-      <Pressable
-        onPress={resetAll}
-        className="px-6 py-3 rounded-full bg-gradient-to-r from-red-400 bg-red-600 shadow-lg transform hover:scale-105 active:scale-95"
-      >
-        <Text className="text-xl font-bold text-white">No</Text>
-      </Pressable>
-    </View>
-  </View>
-)}
 
+        {foodData.nutritional_facts && (
+          <View className="w-full h-[120px] flex justify-center items-center bg-white shadow-md rounded-lg mt-6">
+            <Text className="text-2xl font-extrabold text-gray-900 mb-4">
+              Had You Eaten This?
+            </Text>
+            <View className="flex flex-row justify-evenly w-full gap-x-6 ">
+              <Pressable
+                onPress={dispatch_NutrientsAndIngredientsToStore}
+                className="px-6 py-3 rounded-full bg-green-600 bg-gradient-to-r from-green-400 to-green-600 shadow-lg transform hover:scale-105 active:scale-95"
+              >
+                <Text className="text-xl font-bold text-white">Yes</Text>
+              </Pressable>
+              <Pressable
+                onPress={resetAll}
+                className="px-6 py-3 rounded-full bg-gradient-to-r from-red-400 bg-red-600 shadow-lg transform hover:scale-105 active:scale-95"
+              >
+                <Text className="text-xl font-bold text-white">No</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
       </View>
     </View>
   );

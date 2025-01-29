@@ -51,7 +51,7 @@ const Home = () => {
                 <View key={key} className="w-[48%] bg-gray-50 rounded-xl p-4 mb-4">
                   {getNutrientIcon(key)}
                   <Text className="text-base font-medium text-gray-600 mt-2">{key}</Text>
-                  <Text className="text-xl font-semibold text-gray-800">{value as string} g</Text>
+                  <Text className="text-xl font-semibold text-gray-800">{value as string} </Text>
                 </View>
               ))}
           </View>

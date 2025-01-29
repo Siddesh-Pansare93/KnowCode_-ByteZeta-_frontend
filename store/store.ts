@@ -12,12 +12,18 @@ const persistConfig = {
   storage: AsyncStorage,
 };
 
-const rootReducer = combineReducers({
-  userData: userDataReducer,
-  auth: userAuthReducer,
-  diet: userDietReducer,
-  dailyIntake : dailyIntakeReducer
-});
+const rootReducer = (state : any, action: any) => {
+  if (action.type === 'RESET_STORE') {
+    AsyncStorage.clear(); // Clear AsyncStorage
+    state = undefined; // Reset state in memory
+  }
+  return combineReducers({
+    userData: userDataReducer,
+    auth: userAuthReducer,
+    diet: userDietReducer,
+    dailyIntake: dailyIntakeReducer,
+  })(state, action);
+};
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 

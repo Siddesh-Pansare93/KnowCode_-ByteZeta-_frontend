@@ -1,29 +1,30 @@
-import { View, Text } from 'react-native'
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '@/store/store'
-import { resetNutrients } from '@/store/features/dailyIntakeSlice'
+import { View, Text, Pressable } from 'react-native';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useRouter } from 'expo-router';
+import { persistor } from '@/store/store';
 
-const store = () => {
-  
+const StoreScreen = () => {
+  const store = useSelector((state : any )=> state.user.dailyIntake)
+  console.log("daily Intake : " , store)
 
-    const state  = useSelector((state : RootState ) => state.user)
-    console.log("store : "  , state)
+  const dispatch = useDispatch();
+  const router = useRouter();
 
-      // const dialyGoals = useSelector((state : RootState) => state.user.diet.nutrients);
-      // console.log(dialyGoals)
+  const handleStoreReset =async () => {
+    console.log("Resetting store...");
     
+    dispatch({ type: 'RESET_STORE' }); // Reset Redux state
+    persistor.purge(); // Clear persisted storage
+  };
+
   return (
     <View>
-      {/* {Object.entries(state?.nutrients)?.map(([key , value])=>{
-        return(
-          <Text key={key}>{key} : {value as string}</Text>
-
-        )
-      })} */}
-      {/* <Text>{dialyGoals?.Calories}</Text> */}
+      <Pressable onPress={handleStoreReset}>
+        <Text>Click here to Reset Store</Text>
+      </Pressable>
     </View>
-  )
-}
+  );
+};
 
-export default store
+export default StoreScreen;

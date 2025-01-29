@@ -1,43 +1,47 @@
-import React from "react"
-import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native"
-import { Ionicons, MaterialIcons } from "@expo/vector-icons"
+import React from "react";
+import { View, Text, Image, TouchableOpacity, ScrollView, Alert } from "react-native";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useAuth } from "@clerk/clerk-expo";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
-const menuItems = [
-  {
-    id: "daily-intake",
-    icon: <Ionicons name="calendar-outline" size={24} color="#6B7280" />,
-    title: "Daily Intake",
-  },
-  {
-    id: "my-meals",
-    icon: <Ionicons name="restaurant-outline" size={24} color="#6B7280" />,
-    title: "My Meals",
-  },
-  {
-    id: "nutrition",
-    icon: <Ionicons name="document-text-outline" size={24} color="#6B7280" />,
-    title: "Nutrition Report",
-  },
-  {
-    id: "favorites",
-    icon: <Ionicons name="heart-outline" size={24} color="#6B7280" />,
-    title: "Favorites Food",
-  },
-  {
-    id: "logout",
-    icon: <MaterialIcons name="logout" size={24} color="#6B7280" />,
-    title: "Log out",
-  },
-]
+export default function ProfileScreen() {
+  const { signOut } = useAuth();
+  const router = useRouter();
+  const todaysIntakeIngredients = useSelector((state : RootState) => state.user.dailyIntake.ingredients)
+  console.log(todaysIntakeIngredients)
+  const handleDailyIntake = () => {
+    router.push("/(profileScreens)/dailyIntake");
 
-import { NavigationProp } from '@react-navigation/native';
-import { router } from "expo-router";
+  };
 
-interface ProfileScreenProps {
-  navigation: NavigationProp<any>;
-}
+  const handleMyMeals = () => {
+    router.push("/");
+  };
 
-export default function ProfileScreen({ navigation }: ProfileScreenProps) {
+  const handleNutritionReport = () => {
+    router.push("/(profileScreens)/nutritionReport");
+  };
+
+  const handleFavorites = () => {
+    router.push("/");
+  };
+
+  const handleLogout = async () => {
+    Alert.alert("Logout", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        onPress: async () => {
+          await signOut();
+          router.replace("/signin");
+        },
+        style: "destructive",
+      },
+    ]);
+  };
+
   return (
     <View className="flex-1 bg-white">
       {/* Header */}
@@ -69,39 +73,50 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           <Text className="text-gray-500">@siddheshreact101</Text>
         </View>
 
-        {/* Menu Items */}
+        {/* Menu Items (No Mapping) */}
         <View className="px-4">
-          {menuItems.map((item) => (
-            <TouchableOpacity key={item.id} className="flex-row items-center py-4 border-b border-gray-100">
-              <View className="w-10 h-10 rounded-full bg-gray-50 items-center justify-center">{item.icon}</View>
-              <Text className="flex-1 ml-4 text-base text-gray-800">{item.title}</Text>
-              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
+          <TouchableOpacity onPress={handleDailyIntake} className="flex-row items-center py-4 border-b border-gray-100">
+            <View className="w-10 h-10 rounded-full bg-gray-50 items-center justify-center">
+              <Ionicons name="calendar-outline" size={24} color="#6B7280" />
+            </View>
+            <Text className="flex-1 ml-4 text-base text-gray-800">Daily Intake</Text>
+            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+          </TouchableOpacity>
 
-      {/* Bottom Navigation */}
-      {/* <View className="flex-row items-center justify-between px-8 py-4 border-t border-gray-100">
-        <TouchableOpacity className="items-center">
-          <Ionicons name="home-outline" size={24} color="#6B7280" />
-        </TouchableOpacity>
-        <TouchableOpacity className="items-center">
-          <Ionicons name="restaurant-outline" size={24} color="#6B7280" />
-        </TouchableOpacity>
-        <View className="relative -top-5">
-          <TouchableOpacity className="w-14 h-14 rounded-full bg-lime-400 items-center justify-center">
-            <Ionicons name="add" size={32} color="#fff" />
+          <TouchableOpacity onPress={handleMyMeals} className="flex-row items-center py-4 border-b border-gray-100">
+            <View className="w-10 h-10 rounded-full bg-gray-50 items-center justify-center">
+              <Ionicons name="restaurant-outline" size={24} color="#6B7280" />
+            </View>
+            <Text className="flex-1 ml-4 text-base text-gray-800">My Meals</Text>
+            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handleNutritionReport} className="flex-row items-center py-4 border-b border-gray-100">
+            <View className="w-10 h-10 rounded-full bg-gray-50 items-center justify-center">
+              <Ionicons name="document-text-outline" size={24} color="#6B7280" />
+            </View>
+            <Text className="flex-1 ml-4 text-base text-gray-800">Nutrition Report</Text>
+            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handleFavorites} className="flex-row items-center py-4 border-b border-gray-100">
+            <View className="w-10 h-10 rounded-full bg-gray-50 items-center justify-center">
+              <Ionicons name="heart-outline" size={24} color="#6B7280" />
+            </View>
+            <Text className="flex-1 ml-4 text-base text-gray-800">Favorites Food</Text>
+            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+          </TouchableOpacity>
+
+          {/* Logout Button */}
+          <TouchableOpacity onPress={handleLogout} className="flex-row items-center py-4 border-b border-gray-100">
+            <View className="w-10 h-10 rounded-full bg-gray-50 items-center justify-center">
+              <MaterialIcons name="logout" size={24} color="#6B7280" />
+            </View>
+            <Text className="flex-1 ml-4 text-base text-gray-800">Log out</Text>
+            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </TouchableOpacity>
         </View>
-        <TouchableOpacity className="items-center">
-          <Ionicons name="stats-chart" size={24} color="#6B7280" />
-        </TouchableOpacity>
-        <TouchableOpacity className="items-center">
-          <Ionicons name="person" size={24} color="#000" />
-        </TouchableOpacity>
-      </View> */}
+      </ScrollView>
     </View>
-  )
+  );
 }
-

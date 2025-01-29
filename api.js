@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Base URL of your backend
 const BASE_URL = "http://192.168.151.250:8000";
-const PYTHONURL = "https://know-code-byte-zeta-backend-41c0dpcnv-suuummiiits-projects.vercel.app" ; 
+const PYTHONURL = "http://192.168.151.2:5000" ; 
 
 
 // Axios instance
@@ -63,20 +63,6 @@ export const generateDiet = async (data) => {
     // Prepare the response to match the structure expected by the Redux store
     const formattedResponse = {
       nutrients:  nutritionalInfo , 
-      //  {
-        // calories: nutritionalInfo.Calories,
-        // proteins: nutritionalInfo.Proteins,
-        // carbohydrates: nutritionalInfo.Carbohydrates,
-        // fats: nutritionalInfo.Fats,
-        // fiber: nutritionalInfo.Fiber || 0,  // Add fiber if available
-        // iron: nutritionalInfo.Iron || 0,    // Add iron if available
-        // sodium: nutritionalInfo.Sodium || 0, // Add sodium if available
-        // sugar: nutritionalInfo.Sugar || 0,  // Add sugar if available
-        // vitaminA: nutritionalInfo['Vitamin A'] || 0, // Handle Vitamin A
-        // vitaminB12: nutritionalInfo['Vitamin B12'] || 0, // Handle Vitamin B12
-        // vitaminC: nutritionalInfo['Vitamin C'] || 0, // Handle Vitamin C
-        
-      // },
       mealSuggestions: mealSuggestions,  // Directly use the meal suggestions array from the response
     };
 

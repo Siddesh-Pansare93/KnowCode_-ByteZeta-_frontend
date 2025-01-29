@@ -121,16 +121,16 @@ const Dashboard = () => {
           />
         </View>
 
-        <Text style={{ fontSize: 16, color: "#FF9B9B", marginBottom: 16 }}>Today Calorie: {dailyIntake.calories || 0}</Text>
+        <Text style={{ fontSize: 16, color: "#FF9B9B", marginBottom: 16 }}>Today Calories: {dailyIntake.Calories || 0}</Text>
 
         {/* Nutrient Progress */}
         <View style={{ flexDirection: "row", gap: 16, marginBottom: 24 }}>
         <View className="gap-y-6">
           <View style={styles.nutrientCard}>
-            <CircularProgress percentage={dailyIntake?.fat || 0} label="Fat" value={`${dailyIntake?.fat || 0} kcal`} />
+            <CircularProgress percentage={dailyIntake?.Fat || 0} label="Fat" value={`${dailyIntake?.Fat || 0}`} />
           </View>
           <View style={styles.nutrientCard}>
-            <CircularProgress percentage={dailyIntake?.carbohydrates || 0} label="Carbs" value={`${dailyIntake?.carbohydrates || 0} kcal`} />
+            <CircularProgress percentage={dailyIntake?.Carbohydrate || 0} label="Carbs" value={`${dailyIntake?.Carbohydrate || 0} `} />
           </View>
         </View>
 
