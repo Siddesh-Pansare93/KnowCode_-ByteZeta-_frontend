@@ -29,7 +29,7 @@ const ImageScanner = () => {
     feedback?: string;
     ingredients?: string[];
     nutritional_facts?: string;
-    user_diet?: string;
+    final_thoughts?: string;
   }
 
   const [foodData, setFoodData] = useState<FoodData>({});
@@ -237,10 +237,10 @@ const ImageScanner = () => {
               <Text className="text-gray-600 mt-2">{foodData.feedback}</Text>
             </View>
           )}
-          {foodData && foodData.user_diet && (
+          {foodData && foodData.final_thoughts && (
             <View className="mt-4 p-4 bg-white rounded-lg shadow-md">
               <Text className="text-lg font-bold text-gray-800">Final Thoughts:</Text>
-              <Text className="text-gray-600 mt-2">{foodData.user_diet}</Text>
+              <Text className="text-gray-600 mt-2">{foodData.final_thoughts}</Text>
             </View>
           )}
         </ScrollView>
