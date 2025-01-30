@@ -79,6 +79,15 @@ export default function RootLayout() {
           tabBarIcon: ({ focused }) => (<TabIcon source={icons.profile} focused={focused} />)
         }}
       />
+
+      <Tabs.Screen 
+      name="chat"
+      options={{
+        headerShown : false , 
+        tabBarIcon: ({ focused }) => (<TabIcon source={icons.chat} focused={focused} />)
+
+      }}
+      /> 
       
     </Tabs>
 

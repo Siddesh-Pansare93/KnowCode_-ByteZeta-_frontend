@@ -51,7 +51,7 @@ const UserDetailsForm = () => {
   };
 
   const handleSubmit = async () => {
-    alert(`User Data: ${JSON.stringify(formData, null, 2)}`);
+    // alert(`User Data: ${JSON.stringify(formData, null, 2)}`);
     const dietData = await generateDiet(formData)
     console.log('DietData : ',dietData)
     dispatch(setUserDetails(formData));

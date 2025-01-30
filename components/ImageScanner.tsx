@@ -17,27 +17,30 @@ import { useSelector, useDispatch } from "react-redux";
 import { setNutrients, resetNutrients, addIngredient } from "../store/features/dailyIntakeSlice"; // Update import
 import { AppDispatch, RootState } from "../store/store"; // Make sure to import these from store
 
+// Define the type for food data
+interface FoodData {
+  feedback?: string;
+  ingredients?: string[];
+  nutritional_facts?: string;
+  final_thoughts?: string;
+}
 
-const recentScans: [{}] = [{}]
+// Initialize the recentScans array with FoodData type
+const recentScans: FoodData[] = [];
 
 const ImageScanner = () => {
   const [image, setImage] = useState<string | null>(null);
   const [description, setDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  interface FoodData {
-    feedback?: string;
-    ingredients?: string[];
-    nutritional_facts?: string;
-    final_thoughts?: string;
-  }
-
   const [foodData, setFoodData] = useState<FoodData>({});
-
   const dispatch = useDispatch();
-  const ingredientsFromState = useSelector((state: RootState) => state.user.dailyIntake.ingredients);  // Moved here
-  const userData = useSelector((state: RootState) => state.user.userData)
+  const ingredientsFromState = useSelector(
+    (state: RootState) => state.user.dailyIntake.ingredients
+  );
+  const userData = useSelector((state: RootState) => state.user.userData);
 
+  // Image picker logic
   const pickImage = async (source: string) => {
     const permissionResult =
       source === "camera"
@@ -52,19 +55,20 @@ const ImageScanner = () => {
     const result =
       source === "camera"
         ? await ImagePicker.launchCameraAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          quality: 1,
-        })
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            quality: 1,
+          })
         : await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          quality: 1,
-        });
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            quality: 1,
+          });
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
     }
   };
 
+  // Analyze food image
   const analyzeFoodImage = async () => {
     if (!image) {
       Alert.alert("Error", "Please provide both an image ");
@@ -86,7 +90,7 @@ const ImageScanner = () => {
       const formData = new FormData();
       formData.append("image", fileBlob as any);
       formData.append("description", description || "");
-      formData.append("user_Details", JSON.stringify(userData))
+      formData.append("user_Details", JSON.stringify(userData));
 
       const response = await fetch("http://192.168.151.2:5000/scan_img", {
         method: "POST",
@@ -96,13 +100,12 @@ const ImageScanner = () => {
         },
       });
 
-      const data = await response.json();  // Parse the JSON response
+      const data = await response.json(); // Parse the JSON response
       console.log(data);
 
       if (data) {
         setFoodData(data);
       }
-
     } catch (error) {
       console.error(error);
       Alert.alert("Error", "Failed to analyze the image. Please try again.");
@@ -111,7 +114,7 @@ const ImageScanner = () => {
     }
   };
 
-  // Move logic inside the component
+  // Dispatch nutrients and ingredients to store
   const dispatch_NutrientsAndIngredientsToStore = () => {
     if (foodData.nutritional_facts) {
       const parsedNutritionalFacts = JSON.parse(foodData.nutritional_facts);
@@ -128,21 +131,28 @@ const ImageScanner = () => {
       }
     }
 
+    // Push food data to recentScans and reset foodData
     setTimeout(() => {
-      recentScans.push(foodData)
-      setFoodData({})
-      console.log(recentScans)
-    }, 5000)
-
-
-    
+      recentScans.push(foodData);
+      setFoodData({});
+      console.log(recentScans);
+    }, 5000);
   };
 
   const resetAll = () => {
     setImage(null);
     setDescription("");
+    recentScans.push(foodData);
     setFoodData({});
   };
+
+  const handleSelectScan = (scan: FoodData): void => {
+    // You can either display more details in a modal or update state
+    Alert.alert("Scan Selected", `You selected scan with feedback: ${scan.feedback || "No Feedback"}`);
+    // Alternatively, you could navigate to a different screen or update another part of the UI
+    // Example: navigation.navigate("ScanDetails", { scan });
+  };
+  
 
   return (
     <View className="flex-1 bg-gray-50">
@@ -173,8 +183,7 @@ const ImageScanner = () => {
             />
             <View className="flex-row justify-between mt-4">
               <TouchableOpacity
-                className={`flex-1 py-3 px-6 rounded-lg ${isAnalyzing ? "bg-gray-400" : "bg-green-500"
-                  }`}
+                className={`flex-1 py-3 px-6 rounded-lg ${isAnalyzing ? "bg-gray-400" : "bg-green-500"}`}
                 onPress={analyzeFoodImage}
                 disabled={isAnalyzing}
               >
@@ -210,8 +219,16 @@ const ImageScanner = () => {
         )}
 
         {/* Display Meal Data */}
-
         <ScrollView>
+          {recentScans.map((scan: FoodData, index) => (
+            <Pressable key={index} onPress={() => handleSelectScan(scan)}>
+              <View className="p-4 bg-white shadow-md mb-4 rounded-lg">
+                <Text className="font-semibold text-lg text-gray-800">Scan {index + 1}</Text>
+                <Text className="text-gray-600">{scan.feedback || "No Feedback"}</Text>
+              </View>
+            </Pressable>
+          ))}
+
           {foodData && foodData.ingredients && (
             <View className="mt-4 p-4 bg-white rounded-lg shadow-md">
               <Text className="text-lg font-bold text-gray-800">Ingredients:</Text>
@@ -237,6 +254,7 @@ const ImageScanner = () => {
               <Text className="text-gray-600 mt-2">{foodData.feedback}</Text>
             </View>
           )}
+
           {foodData && foodData.final_thoughts && (
             <View className="mt-4 p-4 bg-white rounded-lg shadow-md">
               <Text className="text-lg font-bold text-gray-800">Final Thoughts:</Text>
@@ -247,21 +265,19 @@ const ImageScanner = () => {
 
         {foodData.nutritional_facts && (
           <View className="w-full h-[120px] flex justify-center items-center bg-white shadow-md rounded-lg mt-6">
-            <Text className="text-2xl font-extrabold text-gray-900 mb-4">
-              Had You Eaten This?
-            </Text>
-            <View className="flex flex-row justify-evenly w-full gap-x-6 ">
+            <Text className="text-2xl font-extrabold text-gray-900 mb-4">Had You Eaten This?</Text>
+            <View className="flex flex-row justify-evenly w-full gap-x-6">
               <Pressable
                 onPress={dispatch_NutrientsAndIngredientsToStore}
                 className="px-6 py-3 rounded-full bg-green-600 bg-gradient-to-r from-green-400 to-green-600 shadow-lg transform hover:scale-105 active:scale-95"
               >
-                <Text className="text-xl font-bold text-white">Yes</Text>
+                <Text className="text-white text-xl font-bold">Yes!</Text>
               </Pressable>
               <Pressable
                 onPress={resetAll}
-                className="px-6 py-3 rounded-full bg-gradient-to-r from-red-400 bg-red-600 shadow-lg transform hover:scale-105 active:scale-95"
+                className="px-6 py-3 rounded-full bg-red-600 bg-gradient-to-r from-red-400 to-red-600 shadow-lg transform hover:scale-105 active:scale-95"
               >
-                <Text className="text-xl font-bold text-white">No</Text>
+                <Text className="text-white text-xl font-bold">No</Text>
               </Pressable>
             </View>
           </View>

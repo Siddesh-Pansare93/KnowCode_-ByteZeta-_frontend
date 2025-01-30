@@ -43,8 +43,6 @@ export const images = {
     getStarted,
     signUpCar,
     check,
-    noResult,
-    message,
     saladbowl , 
     foodapponboarding2 , 
     welcomebg, 
